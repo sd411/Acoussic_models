@@ -40,6 +40,7 @@ os.makedirs('spectrograms3sec')
 os.makedirs('spectrograms3sec/train')
 os.makedirs('spectrograms3sec/test')
 
+#making directories for all the genres we are considering
 genres = 'blues classical country disco pop hiphop metal reggae rock jazz'
 genres = genres.split()
 for g in genres:
@@ -52,7 +53,7 @@ for g in genres:
   
   
   
-  
+#creating 3secs clips from each audio file and putting them in respecctive directories  
 from pydub import AudioSegment
 i = 0
 for g in genres:
@@ -74,9 +75,7 @@ for g in genres:
     except:
         continue
     
-    
-genres = 'jazz'
-genres = genres.split()
+#genearting spectrograms of each audio file    
 for g in genres:
   j = 0
   i = 0
@@ -97,8 +96,7 @@ for g in genres:
     except:
         continue
 
-#continue after this from https://towardsdatascience.com/music-genre-recognition-using-convolutional-neural-networks-cnn-part-1-212c6b93da76
-
+#creating test and train data
 directory = "spectrograms3sec/train/"
 for g in genres:
   filenames = os.listdir(os.path.join(directory,f"{g}"))
@@ -109,7 +107,7 @@ for g in genres:
 
     shutil.move(directory + f"{g}"+ "/" + f,"spectrograms3sec/test/" + f"{g}")
     
-    
+#creating validation set    
 train_dir = "spectrograms3sec/train/"
 train_datagen = ImageDataGenerator(rescale=1./255)
 train_generator = train_datagen.flow_from_directory(train_dir,target_size=(288,432),color_mode="rgba",class_mode='categorical',batch_size=64)
@@ -118,6 +116,8 @@ validation_dir = "spectrograms3sec/test/"
 vali_datagen = ImageDataGenerator(rescale=1./255)
 vali_generator = vali_datagen.flow_from_directory(validation_dir,target_size=(288,432),color_mode='rgba',class_mode='categorical',batch_size=64)
 
+
+#defining model
 def GenreModel(input_shape = (288,432,4),classes=10):
  
  
@@ -168,7 +168,7 @@ def GenreModel(input_shape = (288,432,4),classes=10):
 
   return model
 
-
+#evaluation techniques
 import keras.backend as K
 def get_f1(y_true, y_pred): #taken from old keras source code
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
@@ -195,6 +195,8 @@ class_labels = ['blues',
  'reggae',
  'rock']
 
+
+#helper functions to take any audio an perform the above steps to detect the genre
 def convert_mp3_to_wav(music_file):
   sound = AudioSegment.from_mp3(music_file)
   sound.export("music_file.wav",format="wav")
@@ -254,5 +256,5 @@ def show_output(wav_file,model):
       print("score for "+ str(item) + " is "+ str(prediction[i]))
       i=i+1
   
-
+#show the scores the audio file
 sd = show_output('carad.wav',model)
