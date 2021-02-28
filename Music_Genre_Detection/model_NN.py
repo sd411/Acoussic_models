@@ -44,7 +44,7 @@ for g in genres:
         except:
             continue
         
-
+#generating a csv file to store the features of the audio file
 header = 'filename chroma_stft chroma_stft_var rmse_var rmse_mean spectral_centroid_mean spectral_centroid_var spectral_bandwidth_mean spectral_bandwidth_var rolloff_mean rolloff_var zero_crossing_rate_mean zero_crossing_rate_var y_harm_mean y_harm_var y_perc_mean y_perc_var tempo'
 for i in range(1, 21):
     header += f' mfcc_mean{i} mfcc_var{i}'
@@ -86,7 +86,7 @@ for g in genres:
         
         
         
-        
+#data preprocessing       
 data = pd.read_csv('datalarger2.csv')
 data.head()
 data = data.sample(frac=1).reset_index(drop=True)        
@@ -99,31 +99,16 @@ y = encoder.fit_transform(genre_list)
 scaler = StandardScaler()
 X = scaler.fit_transform(np.array(data.iloc[:, :-1], dtype = float))
 
+                        
+#data splitting
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
+                        
+                        
+# Defining model
 from keras import models
 from keras import layers
-from keras.layers import Dropout
-model = models.Sequential()
-model.add(layers.Dense(256, activation='relu', input_shape=(X_train.shape[1],)))
-model.add(Dropout(0.2))
-model.add(layers.Dense(128, activation='relu'))
-model.add(Dropout(0.2))
-model.add(layers.Dense(64, activation='relu'))
-model.add(Dropout(0.2))
-model.add(layers.Dense(10, activation='softmax'))
-
-
-model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
-        
-        
-
-history = model.fit(X_train,
-                    y_train,
-                    epochs=30,
-                    batch_size=64)       
+from keras.layers import Dropout     
 x_val = X_train[:200]
 partial_x_train = X_train[200:]
 
@@ -160,7 +145,7 @@ x = np.array(x)
 b = x.ravel()     
 encoder.inverse_transform(b)
 
-
+#helper functions
 def get_scores(X,sc,model):
     x = np.array(X)
     x = x.reshape(1,-1)
@@ -172,9 +157,6 @@ def get_scores(X,sc,model):
     for item in range(len(y)):
         print(f'{encoder.classes_[item]} score is ' + f'{y[item]}')
         
-X = [0.34994322061538696,0.13022463023662567,1784.4204464946633,2002.6501916232635,3806.4853160373937,0.08306639113293343,-113.59674835205078,121.55729675292969,-19.158824920654297,42.35102844238281,-6.376458168029785,18.61887550354004,-13.697912216186523,15.34463119506836,-12.285266876220703,10.980491638183594,-8.324324607849121,8.8106689453125,-3.667368173599243,5.751690864562988,-5.162762641906738,0.7509477734565735,-1.6919375658035278,-0.40995270013809204,-2.300208806991577,1.219928503036499]        
-get_scores(X,scaler,model)
-
 
 def get_feature_vector(path):
     ls = []
